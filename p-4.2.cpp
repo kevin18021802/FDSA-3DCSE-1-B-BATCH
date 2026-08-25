@@ -2,76 +2,128 @@
 using namespace std;
 
 class PatientQueue {
-    int q[100];
-    int n;
+    struct Node {
+        int token;
+        Node* next;
+
+        Node(int t) {
+            token = t;
+            next = nullptr;
+        }
+    };
+
+    Node* head;
 
 public:
     PatientQueue() {
-        n = 0;
+        head = nullptr;
     }
 
     void addFront(int token) {
-        for (int i = n; i > 0; i--) {
-            q[i] = q[i - 1];
-        }
-        q[0] = token;
-        n++;
+        Node* newNode = new Node(token);
+
+        newNode->next = head;
+        head = newNode;
     }
 
     void addEnd(int token) {
-        q[n] = token;
-        n++;
+        Node* newNode = new Node(token);
+
+        if (head == nullptr) {
+            head = newNode;
+            return;
+        }
+
+        Node* temp = head;
+
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+
+        temp->next = newNode;
     }
 
     void insertAt(int token, int pos) {
-        if (pos < 0 || pos > n) {
+        if (pos < 0) {
             cout << "Invalid position: " << pos << endl;
             return;
         }
 
-        for (int i = n; i > pos; i--) {
-            q[i] = q[i - 1];
+        if (pos == 0) {
+            addFront(token);
+            return;
         }
 
-        q[pos] = token;
-        n++;
+        Node* temp = head;
+
+        for (int i = 0; i < pos - 1 && temp != nullptr; i++) {
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) {
+            cout << "Invalid position: " << pos << endl;
+            return;
+        }
+
+        Node* newNode = new Node(token);
+
+        newNode->next = temp->next;
+        temp->next = newNode;
     }
 
     void deleteByValue(int token) {
-        int pos = -1;
-
-        for (int i = 0; i < n; i++) {
-            if (q[i] == token) {
-                pos = i;
-                break;
-            }
-        }
-
-        if (pos == -1) {
+        if (head == nullptr) {
             cout << "Patient not found: " << token << endl;
             return;
         }
 
-        for (int i = pos; i < n - 1; i++) {
-            q[i] = q[i + 1];
+        if (head->token == token) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+            return;
         }
 
-        n--;
+        Node* temp = head;
+
+        while (temp->next != nullptr && temp->next->token != token) {
+            temp = temp->next;
+        }
+
+        if (temp->next == nullptr) {
+            cout << "Patient not found: " << token << endl;
+            return;
+        }
+
+        Node* deleteNode = temp->next;
+        temp->next = deleteNode->next;
+        delete deleteNode;
     }
 
     void forwardPrint() {
         cout << "Front to back: ";
-        for (int i = 0; i < n; i++) {
-            cout << q[i] << " ";
+
+        Node* temp = head;
+
+        while (temp != nullptr) {
+            cout << temp->token << " ";
+            temp = temp->next;
         }
+
         cout << endl;
+    }
+
+    void reversePrint(Node* temp) {
+        if (temp == nullptr)
+            return;
+
+        reversePrint(temp->next);
+        cout << temp->token << " ";
     }
 
     void reversePrint() {
         cout << "Back to front: ";
-        for (int i = n - 1; i >= 0; i--) {
-            cout << q[i] << " ";
-        }
+        reversePrint(head);
         cout << endl;
     }
 };
